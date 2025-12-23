@@ -1127,47 +1127,126 @@ PENTING:
   const exportToDocx = async () => {
     if (!validateBeforeExport()) return;
 
+    // Helper to create paragraphs from multiline text
+    const createParagraphs = (text, indent = false) => {
+      if (!text) return [];
+      return text.split('\n').filter(line => line.trim()).map(line =>
+        new Paragraph({
+          text: line,
+          spacing: { after: 120 },
+          indent: indent ? { firstLine: 720 } : undefined
+        })
+      );
+    };
+
     const doc = new Document({
       sections: [{
         properties: {},
         children: [
-          new Paragraph({ text: formData.judul || 'PROPOSAL', heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
-          new Paragraph({ text: 'PROPOSAL PERANCANGAN SISTEM', alignment: AlignmentType.CENTER }),
+          // COVER
+          new Paragraph({ text: formData.judul || 'PROPOSAL PERANCANGAN SISTEM', heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: 'PROPOSAL PERANCANGAN SISTEM', alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
           new Paragraph({ text: '' }),
-          new Paragraph({ text: `Disusun Oleh: ${formData.penulis || '[NAMA]'}`, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: `Disusun Oleh:`, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: formData.penulis || '[NAMA MAHASISWA]', alignment: AlignmentType.CENTER }),
           new Paragraph({ text: formData.nim ? `NIM: ${formData.nim}` : '', alignment: AlignmentType.CENTER }),
-          new Paragraph({ text: formData.instansi || '[INSTANSI]', alignment: AlignmentType.CENTER }),
-          new Paragraph({ text: formData.tahun, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ text: formData.prodi || '[PROGRAM STUDI]', alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: formData.instansi || '[NAMA INSTITUSI]', alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: formData.tahun || new Date().getFullYear().toString(), alignment: AlignmentType.CENTER }),
+
+          // BAB 1 - PENDAHULUAN
           new Paragraph({ text: '', pageBreakBefore: true }),
-          new Paragraph({ text: 'BAB 1 - PENDAHULUAN', heading: HeadingLevel.HEADING_1 }),
-          new Paragraph({ text: formData.bab1_par1_tekno, spacing: { after: 200 } }),
-          new Paragraph({ text: formData.bab1_par2_topik, spacing: { after: 200 } }),
-          new Paragraph({ text: formData.bab1_par3_objek, spacing: { after: 200 } }),
-          new Paragraph({ text: formData.bab1_par4_solusi, spacing: { after: 200 } }),
-          new Paragraph({ text: formData.bab1_par5_metode, spacing: { after: 200 } }),
-          new Paragraph({ text: formData.bab1_par6_penutup, spacing: { after: 200 } }),
+          new Paragraph({ text: 'BAB 1', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: 'PENDAHULUAN', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
+          new Paragraph({ text: '1.1 Latar Belakang', heading: HeadingLevel.HEADING_2 }),
+          ...createParagraphs(formData.bab1_par1_tekno, true),
+          ...createParagraphs(formData.bab1_par2_topik, true),
+          ...createParagraphs(formData.bab1_par3_objek, true),
+          ...createParagraphs(formData.bab1_par4_solusi, true),
+          ...createParagraphs(formData.bab1_par5_metode, true),
+          ...createParagraphs(formData.bab1_par6_penutup, true),
+
+          // BAB 2 - TINJAUAN PUSTAKA
           new Paragraph({ text: '', pageBreakBefore: true }),
-          new Paragraph({ text: 'BAB 2 - TINJAUAN PUSTAKA', heading: HeadingLevel.HEADING_1 }),
-          new Paragraph({ text: formData.bab2_intro, spacing: { after: 200 } }),
-          new Paragraph({ text: '2.1 Perancangan', heading: HeadingLevel.HEADING_2 }),
-          new Paragraph({ text: formData.bab2_1_1_perancangan, spacing: { after: 200 } }),
-          new Paragraph({ text: '2.2 Sistem Informasi', heading: HeadingLevel.HEADING_2 }),
-          new Paragraph({ text: formData.bab2_1_2_si, spacing: { after: 200 } }),
+          new Paragraph({ text: 'BAB 2', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: 'TINJAUAN PUSTAKA', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
+          ...createParagraphs(formData.bab2_intro, true),
+          new Paragraph({ text: '2.1 Landasan Teori', heading: HeadingLevel.HEADING_2 }),
+          new Paragraph({ text: '2.1.1 Perancangan', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.bab2_1_1_perancangan, true),
+          new Paragraph({ text: '2.1.2 Sistem Informasi', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.bab2_1_2_si, true),
+          new Paragraph({ text: '2.1.3 Teori tentang Objek Studi', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.bab2_1_3_objek_teori, true),
+          new Paragraph({ text: '2.1.4 UML (Unified Modeling Language)', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.bab2_1_4_uml_intro, true),
+          new Paragraph({ text: 'a. Use Case Diagram', heading: HeadingLevel.HEADING_4 }),
+          ...createParagraphs(formData.bab2_1_4_usecase, true),
+          new Paragraph({ text: 'b. Activity Diagram', heading: HeadingLevel.HEADING_4 }),
+          ...createParagraphs(formData.bab2_1_4_activity, true),
+          new Paragraph({ text: 'c. Class Diagram', heading: HeadingLevel.HEADING_4 }),
+          ...createParagraphs(formData.bab2_1_4_class, true),
+          new Paragraph({ text: '2.1.5 Metode Pengembangan Sistem', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.bab2_1_5_metode_pengembangan, true),
+          new Paragraph({ text: '2.2 Profil Objek Perancangan', heading: HeadingLevel.HEADING_2 }),
+          ...createParagraphs(formData.bab2_2_pembahasan_objek, true),
+          new Paragraph({ text: '2.3 Penelitian Terdahulu', heading: HeadingLevel.HEADING_2 }),
+          ...createParagraphs(formData.bab2_3_penelitian_terdahulu, true),
+          new Paragraph({ text: '2.4 Tahapan Perancangan', heading: HeadingLevel.HEADING_2 }),
+          ...createParagraphs(formData.bab2_4_tahapan, true),
+
+          // BAB 3 - HASIL DAN PERANCANGAN
           new Paragraph({ text: '', pageBreakBefore: true }),
-          new Paragraph({ text: 'BAB 3 - HASIL DAN PERANCANGAN', heading: HeadingLevel.HEADING_1 }),
-          new Paragraph({ text: '3.1 Analisis Masalah', heading: HeadingLevel.HEADING_2 }),
-          new Paragraph({ text: formData.bab3_1_1_analisis_masalah, spacing: { after: 200 } }),
-          new Paragraph({ text: '3.2 Kebutuhan Fungsional', heading: HeadingLevel.HEADING_2 }),
-          new Paragraph({ text: formData.bab3_2_2_fungsional, spacing: { after: 200 } }),
+          new Paragraph({ text: 'BAB 3', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: 'HASIL DAN PERANCANGAN', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
+          new Paragraph({ text: '3.1 Hasil Pengumpulan Data', heading: HeadingLevel.HEADING_2 }),
+          new Paragraph({ text: '3.1.1 Analisis Masalah', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.bab3_1_1_analisis_masalah, true),
+          new Paragraph({ text: '3.1.2 Metode Pengumpulan Data', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.bab3_1_2_metode_pengumpulan, true),
+          new Paragraph({ text: '3.2 Perancangan Sistem', heading: HeadingLevel.HEADING_2 }),
+          new Paragraph({ text: '3.2.1 Flowchart Sistem', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.bab3_2_1_flowchart_desc, true),
+          new Paragraph({ text: '(Diagram flowchart terlampir)', spacing: { after: 200 } }),
+          new Paragraph({ text: '3.2.2 ERD (Entity Relationship Diagram)', heading: HeadingLevel.HEADING_3 }),
+          ...createParagraphs(formData.erd_desc, true),
+          new Paragraph({ text: '(Diagram ERD terlampir)', spacing: { after: 200 } }),
+          new Paragraph({ text: '3.2.3 Analisis Kebutuhan', heading: HeadingLevel.HEADING_3 }),
+          new Paragraph({ text: 'a. Kebutuhan Fungsional', heading: HeadingLevel.HEADING_4 }),
+          ...createParagraphs(formData.bab3_2_2_fungsional, true),
+          new Paragraph({ text: 'b. Kebutuhan Non-Fungsional', heading: HeadingLevel.HEADING_4 }),
+          ...createParagraphs(formData.bab3_2_2_non_fungsional, true),
+          new Paragraph({ text: 'c. Analisis Hardware', heading: HeadingLevel.HEADING_4 }),
+          ...createParagraphs(formData.bab3_2_2_hardware, true),
+          new Paragraph({ text: 'd. Analisis Software', heading: HeadingLevel.HEADING_4 }),
+          ...createParagraphs(formData.bab3_2_2_software, true),
+
+          // BAB 4 - KESIMPULAN DAN SARAN
           new Paragraph({ text: '', pageBreakBefore: true }),
-          new Paragraph({ text: 'BAB 4 - KESIMPULAN DAN SARAN', heading: HeadingLevel.HEADING_1 }),
+          new Paragraph({ text: 'BAB 4', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: 'KESIMPULAN DAN SARAN', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
           new Paragraph({ text: '4.1 Kesimpulan', heading: HeadingLevel.HEADING_2 }),
-          new Paragraph({ text: formData.bab4_1_kesimpulan, spacing: { after: 200 } }),
+          ...createParagraphs(formData.bab4_1_kesimpulan, true),
           new Paragraph({ text: '4.2 Saran', heading: HeadingLevel.HEADING_2 }),
-          new Paragraph({ text: formData.bab4_2_saran, spacing: { after: 200 } }),
+          ...createParagraphs(formData.bab4_2_saran, true),
+
+          // DAFTAR PUSTAKA
           new Paragraph({ text: '', pageBreakBefore: true }),
-          new Paragraph({ text: 'DAFTAR PUSTAKA', heading: HeadingLevel.HEADING_1 }),
-          new Paragraph({ text: formData.daftar_pustaka }),
+          new Paragraph({ text: 'DAFTAR PUSTAKA', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
+          ...createParagraphs(formData.daftar_pustaka),
+
+          // LAMPIRAN
+          new Paragraph({ text: '', pageBreakBefore: true }),
+          new Paragraph({ text: 'LAMPIRAN', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
+          new Paragraph({ text: 'Lampiran 1: Draf Pertanyaan Wawancara', heading: HeadingLevel.HEADING_2 }),
+          ...createParagraphs(formData.lampiran_draf_wawancara),
+          new Paragraph({ text: 'Lampiran 2: Hasil Wawancara', heading: HeadingLevel.HEADING_2 }),
+          ...createParagraphs(formData.lampiran_hasil_wawancara),
+          new Paragraph({ text: 'Lampiran 3: Dokumentasi', heading: HeadingLevel.HEADING_2 }),
+          ...createParagraphs(formData.lampiran_dokumentasi),
+          new Paragraph({ text: 'Lampiran 4: Surat Izin Observasi', heading: HeadingLevel.HEADING_2 }),
+          ...createParagraphs(formData.lampiran_surat),
         ]
       }]
     });
@@ -1182,30 +1261,42 @@ PENTING:
 
     const element = document.getElementById('document-preview');
     if (!element) {
-      alert('Buka Preview terlebih dahulu!');
+      alert('⚠️ Buka Preview terlebih dahulu sebelum export PDF!');
       return;
     }
 
-    // Show loading state
-    const originalText = element.innerHTML;
-    const loadingDiv = document.createElement('div');
-    loadingDiv.innerHTML = '<p style="text-align:center;padding:20px;">⏳ Membuat PDF, mohon tunggu...</p>';
+    // Show loading alert
+    alert('📄 Proses pembuatan PDF dimulai. Mohon tunggu beberapa saat...\n\nDokumen besar mungkin memerlukan waktu 30-60 detik.');
 
     try {
-      // Use lower quality settings to prevent lag
+      // Clone element to avoid modifying the original
+      const cloneElement = element.cloneNode(true);
+      
+      // Remove any elements that might cause issues
+      const diagramErrors = cloneElement.querySelectorAll('.text-red-500, .text-gray-400');
+      diagramErrors.forEach(el => el.remove());
+
       const opt = {
-        margin: 10,
-        filename: `proposal_${formData.judul?.slice(0, 30) || 'dokumen'}.pdf`,
-        image: { type: 'jpeg', quality: 0.8 },
-        html2canvas: { scale: 1, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        margin: [15, 15, 15, 15],
+        filename: `proposal_${formData.judul?.slice(0, 30) || 'dokumen'}_${Date.now()}.pdf`,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          logging: false,
+          letterRendering: true,
+          allowTaint: true
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
 
-      // Process async
       await html2pdf().set(opt).from(element).save();
+      
+      alert('✅ PDF berhasil dibuat dan didownload!');
     } catch (err) {
       console.error('PDF export error:', err);
-      alert('Gagal export PDF. Coba lagi.');
+      alert(`❌ Gagal membuat PDF.\n\nError: ${err.message}\n\nTips:\n- Coba perkecil ukuran gambar\n- Gunakan browser Chrome/Edge\n- Coba export DOCX sebagai alternatif`);
     }
   };
 
