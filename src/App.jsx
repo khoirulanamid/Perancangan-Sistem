@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Book, FileText, Copy, PenTool, Layout, CheckSquare, Wand2, Loader2, RotateCcw, BrainCircuit, Printer, FolderOpen, Save, Upload, AlertCircle, Search, Moon, Sun, Settings, X, Key, FileDown, Plus, Trash2, History, Database, Columns, FileType } from 'lucide-react';
+import { Book, BookOpen, FileText, Copy, PenTool, Layout, CheckSquare, Wand2, Loader2, RotateCcw, BrainCircuit, Printer, FolderOpen, Save, Upload, AlertCircle, Search, Moon, Sun, Settings, X, Key, FileDown, Plus, Trash2, History, Database, Columns, FileType, Library, Puzzle, Trophy, FileSignature, Paperclip } from 'lucide-react';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
 import { saveAs } from 'file-saver';
 import mermaid from 'mermaid';
