@@ -865,7 +865,15 @@ PENTING:
             setLoadingText('✅ [100%] Selesai!');
             setGenerateProgress(100);
             const parsed = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
-            setFormData(prev => ({ ...prev, ...parsed, judul: smartInput.judul, instansi: smartInput.instansi }));
+            // Preserve daftar_pustaka from Google Scholar if it exists
+            setFormData(prev => ({
+              ...prev,
+              ...parsed,
+              judul: smartInput.judul,
+              instansi: smartInput.instansi,
+              // Keep Scholar daftar_pustaka, only use AI's if Scholar failed
+              daftar_pustaka: prev.daftar_pustaka || parsed.daftar_pustaka || ''
+            }));
             setShowPreview(true);
             setIsGenerating(false);
             return;
@@ -917,7 +925,14 @@ PENTING:
               setLoadingText('✅ [100%] Selesai!');
               setGenerateProgress(100);
               const parsed = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
-              setFormData(prev => ({ ...prev, ...parsed, judul: smartInput.judul, instansi: smartInput.instansi }));
+              // Preserve daftar_pustaka from Google Scholar if it exists
+              setFormData(prev => ({
+                ...prev,
+                ...parsed,
+                judul: smartInput.judul,
+                instansi: smartInput.instansi,
+                daftar_pustaka: prev.daftar_pustaka || parsed.daftar_pustaka || ''
+              }));
               setShowPreview(true);
               setIsGenerating(false);
               return;
@@ -977,7 +992,14 @@ PENTING:
             setLoadingText('✅ [100%] Selesai!');
             setGenerateProgress(100);
             const parsed = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
-            setFormData(prev => ({ ...prev, ...parsed, judul: smartInput.judul, instansi: smartInput.instansi }));
+            // Preserve daftar_pustaka from Google Scholar if it exists
+            setFormData(prev => ({
+              ...prev,
+              ...parsed,
+              judul: smartInput.judul,
+              instansi: smartInput.instansi,
+              daftar_pustaka: prev.daftar_pustaka || parsed.daftar_pustaka || ''
+            }));
             setShowPreview(true);
             setIsGenerating(false);
             return;
@@ -1044,7 +1066,14 @@ PENTING:
               setLoadingText('✅ [100%] Selesai!');
               setGenerateProgress(100);
               const parsed = JSON.parse(jsonStr);
-              setFormData(prev => ({ ...prev, ...parsed, judul: smartInput.judul, instansi: smartInput.instansi }));
+              // Preserve daftar_pustaka from Google Scholar if it exists
+              setFormData(prev => ({
+                ...prev,
+                ...parsed,
+                judul: smartInput.judul,
+                instansi: smartInput.instansi,
+                daftar_pustaka: prev.daftar_pustaka || parsed.daftar_pustaka || ''
+              }));
               setShowPreview(true);
               setIsGenerating(false);
               return;
@@ -2146,11 +2175,24 @@ const PreviewDocument = ({ formData, schedule, setActivePreviewSection }) => {
           {formData.daftar_pustaka ? (
             formData.daftar_pustaka.split('\n\n').map((ref, i) => (
               <div key={i} className="pl-10 -indent-10 text-sm leading-relaxed">
-                {ref.split('\n').map((line, j) => (
-                  <div key={j} className={line.includes('http') ? 'text-blue-600 break-all' : ''}>
-                    {line}
-                  </div>
-                ))}
+                {ref.split('\n').map((line, j) => {
+                  // Check if line contains URL
+                  const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
+                  if (urlMatch) {
+                    const url = urlMatch[1];
+                    const parts = line.split(url);
+                    return (
+                      <div key={j} className="text-blue-600 break-all">
+                        {parts[0]}
+                        <a href={url} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-800">
+                          {url}
+                        </a>
+                        {parts[1]}
+                      </div>
+                    );
+                  }
+                  return <div key={j}>{line}</div>;
+                })}
               </div>
             ))
           ) : (
