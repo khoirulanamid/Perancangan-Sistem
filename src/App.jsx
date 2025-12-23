@@ -1269,34 +1269,91 @@ PENTING:
     alert('📄 Proses pembuatan PDF dimulai. Mohon tunggu beberapa saat...\n\nDokumen besar mungkin memerlukan waktu 30-60 detik.');
 
     try {
-      // Clone element to avoid modifying the original
-      const cloneElement = element.cloneNode(true);
-      
-      // Remove any elements that might cause issues
-      const diagramErrors = cloneElement.querySelectorAll('.text-red-500, .text-gray-400');
-      diagramErrors.forEach(el => el.remove());
+      // Create a temporary container with safe CSS (no oklab colors)
+      const tempContainer = document.createElement('div');
+      tempContainer.style.cssText = `
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        width: 210mm;
+        background: white;
+        color: black;
+        font-family: "Times New Roman", Times, serif;
+      `;
+
+      // Clone the element
+      const clone = element.cloneNode(true);
+
+      // Override all styles to use safe colors (no oklab)
+      clone.style.cssText = `
+        background: white !important;
+        color: black !important;
+        width: 210mm;
+        padding: 25mm;
+        font-family: "Times New Roman", Times, serif;
+      `;
+
+      // Fix all child elements to use safe colors
+      const allElements = clone.querySelectorAll('*');
+      allElements.forEach(el => {
+        const computedStyle = window.getComputedStyle(el);
+        // Convert colors to safe hex values
+        if (computedStyle.color) {
+          el.style.color = el.style.color || 'inherit';
+        }
+        if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+          el.style.backgroundColor = 'transparent';
+        }
+        // Remove any text with oklab
+        if (el.className && typeof el.className === 'string') {
+          // Keep essential classes but ensure colors are safe
+        }
+      });
+
+      // Remove diagrams that failed to render (they show error placeholders)
+      const errorPlaceholders = clone.querySelectorAll('[class*="text-gray-"], [class*="text-red-"]');
+      errorPlaceholders.forEach(el => {
+        if (el.textContent?.includes('Loading') || el.textContent?.includes('error')) {
+          el.style.display = 'none';
+        }
+      });
+
+      // Set explicit colors on important elements
+      const headings = clone.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      headings.forEach(h => {
+        h.style.color = 'black';
+      });
+
+      const links = clone.querySelectorAll('a');
+      links.forEach(a => {
+        a.style.color = '#1d4ed8'; // blue-700 in hex
+      });
+
+      tempContainer.appendChild(clone);
+      document.body.appendChild(tempContainer);
 
       const opt = {
-        margin: [15, 15, 15, 15],
+        margin: [10, 10, 10, 10],
         filename: `proposal_${formData.judul?.slice(0, 30) || 'dokumen'}_${Date.now()}.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true, 
+        image: { type: 'jpeg', quality: 0.92 },
+        html2canvas: {
+          scale: 1.5,
+          useCORS: true,
           logging: false,
-          letterRendering: true,
-          allowTaint: true
+          backgroundColor: '#ffffff'
         },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      await html2pdf().set(opt).from(element).save();
-      
+      await html2pdf().set(opt).from(clone).save();
+
+      // Cleanup
+      document.body.removeChild(tempContainer);
+
       alert('✅ PDF berhasil dibuat dan didownload!');
     } catch (err) {
       console.error('PDF export error:', err);
-      alert(`❌ Gagal membuat PDF.\n\nError: ${err.message}\n\nTips:\n- Coba perkecil ukuran gambar\n- Gunakan browser Chrome/Edge\n- Coba export DOCX sebagai alternatif`);
+      alert(`❌ Gagal membuat PDF.\n\nError: ${err.message}\n\nSolusi: Gunakan export DOCX sebagai alternatif, lalu convert ke PDF menggunakan Microsoft Word atau Google Docs.`);
     }
   };
 
